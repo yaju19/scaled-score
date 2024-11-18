@@ -4,6 +4,11 @@ export const schema = yup.object().shape({
   assessment_name: yup.string().required("Assessment Name is required"),
   assessment_type: yup
     .string()
+    .transform((value) => {
+      // Coerce to string if it's an object or other type
+      return typeof value === "object" ? String(value) : value;
+    })
+    .default("GENERIC")
     .required("Assessment Type is required")
     .oneOf(["SAT", "ACT", "GENERIC"], "Invalid Assessment Type"),
   difficulty_weights: yup
@@ -22,8 +27,9 @@ export const schema = yup.object().shape({
     .required("Difficulty weights are required"),
   configuration_type: yup
     .string()
+    .default("Category")
     .when("assessment_type", (assessment_type) => {
-      if (typeof assessment_type === "string" && assessment_type == "SAT") {
+      if (assessment_type == "SAT") {
         return yup
           .string()
           .oneOf(["Category"], "Configuration Type must be 'Category' for SAT");
@@ -39,6 +45,7 @@ export const schema = yup.object().shape({
     }),
   score_aggregation_strategy: yup
     .string()
+    .default("Sum")
     .when("assessment_type", (assessment_type) => {
       if (assessment_type == "SAT") {
         return yup
@@ -54,26 +61,30 @@ export const schema = yup.object().shape({
       }
       return yup.string().required("Score Aggregation Strategy is required");
     }),
-  scoring_strategy: yup.string().when("assessment_type", (assessment_type) => {
-    if (assessment_type == "SAT") {
-      return yup
-        .string()
-        .oneOf(
-          ["Weighted_Mean"],
-          "Scoring Strategy must be 'Weighted Mean' for SAT"
-        );
-    } else if (assessment_type == "ACT") {
-      return yup
-        .string()
-        .oneOf(
-          ["Mapped_Score"],
-          "Scoring Strategy must be 'Mapping Type' for ACT"
-        );
-    }
-    return yup.string().required("Scoring Strategy is required");
-  }),
+  scoring_strategy: yup
+    .string()
+    .default("Weighted_Mean")
+    .when("assessment_type", (assessment_type) => {
+      if (assessment_type == "SAT") {
+        return yup
+          .string()
+          .oneOf(
+            ["Weighted_Mean"],
+            "Scoring Strategy must be 'Weighted Mean' for SAT"
+          );
+      } else if (assessment_type == "ACT") {
+        return yup
+          .string()
+          .oneOf(
+            ["Mapped_Score"],
+            "Scoring Strategy must be 'Mapping Type' for ACT"
+          );
+      }
+      return yup.string().required("Scoring Strategy is required");
+    }),
   configuration_units: yup
     .array()
+    .default([])
     .when("assessment_type", (assessment_type, schema) => {
       if (assessment_type == "SAT") {
         return schema

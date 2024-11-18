@@ -59,7 +59,7 @@ const HookFormPOC: React.FC = () => {
       configuration_type: "Category",
       score_aggregation_strategy: "Sum",
       scoring_strategy: "Weighted_Mean",
-      configuration_units: genericScaledScoreConfiguration,
+      configuration_units: [],
       difficulty_weights: difficultyWeights,
     },
     resolver: yupResolver(schema),
@@ -175,25 +175,38 @@ const HookFormPOC: React.FC = () => {
           )}
         </div>
 
+        <label className="block mb-2 font-semibold">Difficulty Weights</label>
         <div className="mb-4">
-          <label className="block mb-2 font-semibold">Difficulty Weights</label>
           {Object.keys(difficultyWeights).map((key) => (
-            <>
-              <div key={key} className="mb-2 flex gap-x-2">
+            <React.Fragment key={key}>
+              <div className="mb-2 flex gap-x-2">
                 <label className="basis-1/6 block mb-1">{key}</label>
                 <input
                   type="number"
-                  {...register(`difficulty_weights.${key}`)}
-                  defaultValue={difficultyWeights[key]}
+                  {...register(
+                    `difficulty_weights.${
+                      key as keyof typeof difficultyWeights
+                    }`
+                  )}
+                  defaultValue={
+                    difficultyWeights[key as keyof typeof difficultyWeights]
+                  }
                   className="border p-2 w-full"
                 />
               </div>
-              {errors.difficulty_weights && errors.difficulty_weights[key] && (
-                <p className="text-red-500">
-                  {errors.difficulty_weights[key].message}
-                </p>
-              )}
-            </>
+              {errors.difficulty_weights &&
+                errors.difficulty_weights[
+                  key as keyof typeof difficultyWeights
+                ] && (
+                  <p className="text-red-500">
+                    {
+                      errors.difficulty_weights[
+                        key as keyof typeof difficultyWeights
+                      ]?.message
+                    }
+                  </p>
+                )}
+            </React.Fragment>
           ))}
         </div>
 
@@ -366,11 +379,19 @@ const HookFormPOC: React.FC = () => {
                       }))}
                       className="border p-2 w-full"
                       onChange={(selectedOptions) => {
-                        const updatedSections = selectedOptions.map((option) =>
-                          assessmentSections.find(
-                            (section) => section.id === option.value
+                        const updatedSections = selectedOptions
+                          .map((option) =>
+                            assessmentSections.find(
+                              (
+                                section
+                              ): section is {
+                                name: string;
+                                id: number;
+                                question_count: number;
+                              } => section.id === option.value
+                            )
                           )
-                        );
+                          .filter((section) => section !== undefined);
                         field.onChange(updatedSections);
                         update(index, {
                           ...fields[index],

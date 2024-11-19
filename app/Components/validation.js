@@ -11,20 +11,7 @@ export const schema = yup.object().shape({
     .default("GENERIC")
     .required("Assessment Type is required")
     .oneOf(["SAT", "ACT", "GENERIC"], "Invalid Assessment Type"),
-  difficulty_weights: yup
-    .object()
-    .shape({
-      "No Difficulty": yup
-        .number()
-        .required()
-        .min(0, "Value must be non-negative"),
-      "Very Easy": yup.number().required().min(0, "Value must be non-negative"),
-      Easy: yup.number().required().min(0, "Value must be non-negative"),
-      Medium: yup.number().required().min(0, "Value must be non-negative"),
-      Hard: yup.number().required().min(0, "Value must be non-negative"),
-      "Very Hard": yup.number().required().min(0, "Value must be non-negative"),
-    })
-    .required("Difficulty weights are required"),
+
   configuration_type: yup
     .string()
     .default("Category")
@@ -82,6 +69,31 @@ export const schema = yup.object().shape({
       }
       return yup.string().required("Scoring Strategy is required");
     }),
+  difficulty_weights: yup
+    .object()
+    .shape({
+      "No Difficulty": yup
+        .number()
+        .required()
+        .min(0, "Value must be non-negative"),
+      "Very Easy": yup.number().required().min(0, "Value must be non-negative"),
+      Easy: yup.number().required().min(0, "Value must be non-negative"),
+      Medium: yup.number().required().min(0, "Value must be non-negative"),
+      Hard: yup.number().required().min(0, "Value must be non-negative"),
+      "Very Hard": yup.number().required().min(0, "Value must be non-negative"),
+    })
+    .when("scoring_strategy", (scoring_strategy, schema) => {
+      return scoring_strategy === "Weighted_Mean"
+        ? schema.required(
+            "Difficulty weights are required when scoring strategy is Weighted Mean"
+          )
+        : schema.nullable();
+    }),
+  scaled_score_step_size: yup
+    .number()
+    .required("Scaled Score Step Size is required")
+    .min(0, "Value must be non-negative")
+    .integer("Value must be an integer"),
   configuration_units: yup
     .array()
     .default([])

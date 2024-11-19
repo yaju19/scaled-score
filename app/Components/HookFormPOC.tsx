@@ -61,12 +61,14 @@ const HookFormPOC: React.FC = () => {
       scoring_strategy: "Weighted_Mean",
       configuration_units: [],
       difficulty_weights: difficultyWeights,
+      scaled_score_step_size: 1,
     },
     resolver: yupResolver(schema),
   });
 
   console.log("====form errors", errors);
   const assessmentType = watch("assessment_type");
+  const scoringStrategy = watch("scoring_strategy");
   // console.log(typeof assessmentType, "====type of assessment type");
 
   const { fields, remove, update, append } = useFieldArray({
@@ -103,10 +105,12 @@ const HookFormPOC: React.FC = () => {
       setValue("configuration_type", "Category");
       setValue("score_aggregation_strategy", "Sum");
       setValue("scoring_strategy", "Weighted_Mean");
+      setValue("scaled_score_step_size", 10);
     } else if (assessmentType === "ACT") {
       setValue("configuration_type", "Section");
       setValue("score_aggregation_strategy", "Average");
       setValue("scoring_strategy", "Mapped_Score");
+      setValue("scaled_score_step_size", 1);
     }
   }, [assessmentType, setValue]);
 
@@ -173,41 +177,6 @@ const HookFormPOC: React.FC = () => {
           {errors.assessment_name && (
             <p className="text-red-500">{errors.assessment_name.message}</p>
           )}
-        </div>
-
-        <label className="block mb-2 font-semibold">Difficulty Weights</label>
-        <div className="mb-4">
-          {Object.keys(difficultyWeights).map((key) => (
-            <React.Fragment key={key}>
-              <div className="mb-2 flex gap-x-2">
-                <label className="basis-1/6 block mb-1">{key}</label>
-                <input
-                  type="number"
-                  {...register(
-                    `difficulty_weights.${
-                      key as keyof typeof difficultyWeights
-                    }`
-                  )}
-                  defaultValue={
-                    difficultyWeights[key as keyof typeof difficultyWeights]
-                  }
-                  className="border p-2 w-full"
-                />
-              </div>
-              {errors.difficulty_weights &&
-                errors.difficulty_weights[
-                  key as keyof typeof difficultyWeights
-                ] && (
-                  <p className="text-red-500">
-                    {
-                      errors.difficulty_weights[
-                        key as keyof typeof difficultyWeights
-                      ]?.message
-                    }
-                  </p>
-                )}
-            </React.Fragment>
-          ))}
         </div>
 
         <div className="mb-4">
@@ -279,6 +248,7 @@ const HookFormPOC: React.FC = () => {
             </p>
           )}
         </div>
+
         <div className="mb-4">
           <label
             htmlFor="scoring_strategy"
@@ -298,6 +268,69 @@ const HookFormPOC: React.FC = () => {
           />
           {errors.scoring_strategy && (
             <p className="text-red-500">{errors.scoring_strategy.message}</p>
+          )}
+        </div>
+
+        {scoringStrategy === "Weighted_Mean" && (
+          <>
+            <label className="block mb-2 font-semibold">
+              Difficulty Weights
+            </label>
+            <div className="mb-4">
+              {Object.keys(difficultyWeights).map((key) => (
+                <React.Fragment key={key}>
+                  <div className="mb-2 flex gap-x-2">
+                    <label className="basis-1/6 block mb-1">{key}</label>
+                    <input
+                      type="number"
+                      {...register(
+                        `difficulty_weights.${
+                          key as keyof typeof difficultyWeights
+                        }`
+                      )}
+                      defaultValue={
+                        difficultyWeights[key as keyof typeof difficultyWeights]
+                      }
+                      className="border p-2 w-full"
+                    />
+                  </div>
+                  {errors.difficulty_weights &&
+                    errors.difficulty_weights[
+                      key as keyof typeof difficultyWeights
+                    ] && (
+                      <p className="text-red-500">
+                        {
+                          errors.difficulty_weights[
+                            key as keyof typeof difficultyWeights
+                          ]?.message
+                        }
+                      </p>
+                    )}
+                </React.Fragment>
+              ))}
+            </div>
+          </>
+        )}
+
+        <div className="mb-4">
+          <label
+            htmlFor="scaled_score_step_size"
+            className="block mb-2 font-semibold"
+          >
+            Scaled Score Step Size
+          </label>
+          <input
+            id="scaled_score_step_size"
+            {...register("scaled_score_step_size", {
+              required: "Step size is required",
+            })}
+            type="number"
+            className="border p-2 w-full"
+          />
+          {errors.scaled_score_step_size && (
+            <p className="text-red-500">
+              {errors.scaled_score_step_size.message}
+            </p>
           )}
         </div>
 

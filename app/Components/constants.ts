@@ -1,10 +1,10 @@
 export const difficultyWeights = {
   "No Difficulty": 0,
-  "Very Easy": 1,
-  Easy: 2,
-  Medium: 3,
-  Hard: 4,
-  "Very Hard": 5,
+  "Very Easy": 0.2,
+  Easy: 0.4,
+  Medium: 0.6,
+  Hard: 0.8,
+  "Very Hard": 1,
 };
 
 export interface FormValues {
@@ -22,6 +22,7 @@ export interface FormValues {
   configuration_type: string;
   score_aggregation_strategy: string;
   scoring_strategy: string;
+  scaled_score_step_size: number;
 }
 
 export interface ConfigurationUnit {
